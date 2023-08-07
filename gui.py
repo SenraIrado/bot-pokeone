@@ -1,25 +1,25 @@
 #Create simple GUI with pyqt5 and matplotlib
 
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QMainWindow
-from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import pyqtSlot
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-import os
-import csv
+
+import PyQt5.QtCore
+import PyQt5.QtGui
+import PyQt5.QtWidgets
 import matplotlib
+
 matplotlib.use('Qt5Agg')
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
 from matplotlib import style
 style.use('ggplot')
+
+
+def closebot():
+    print("Bot closed")
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Pokebot")
+        self.setWindowTitle("Poke bot")
         self.setGeometry(100,100,800,600)
         self.move(60,15)
 
@@ -59,8 +59,7 @@ class MainWindow(QMainWindow):
         bexit.setGeometry(50, 250, 100, 30)
 
     
-        #self.show()
-        #Test
+    
     def namecheck(self):
         pname = self.pline1.text()
         print("Name saved:", pname)
@@ -75,8 +74,6 @@ class MainWindow(QMainWindow):
     def stopbot(self):
         print("Bot stopped")
 
-    def closebot(self):
-        print("Bot closed")
 
 app=QApplication(sys.argv)
 window=MainWindow()
