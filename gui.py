@@ -60,6 +60,7 @@ class MainWindow(QMainWindow):
 
     
         #self.show()
+        #Test
     def namecheck(self):
         pname = self.pline1.text()
         print("Name saved:", pname)
