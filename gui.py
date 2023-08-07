@@ -59,8 +59,7 @@ class MainWindow(QMainWindow):
         bexit.setGeometry(50, 250, 100, 30)
 
     
-        #self.show()
-        #Test
+    
     def namecheck(self):
         pname = self.pline1.text()
         print("Name saved:", pname)
