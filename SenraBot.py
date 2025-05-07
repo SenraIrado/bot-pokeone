@@ -1,18 +1,34 @@
 import pyautogui
 import time
 import random
+import json
+from pathlib import Path
 from Functions.gui import MainWindow
+from rapidfuzz import fuzz
 
 #Imported Variables
-pname = MainWindow.namecheck()
-pnature = MainWindow.naturecheck()
+wanted_name = MainWindow.namecheck()
+wanted_nature = MainWindow.naturecheck()
 bot_enable = MainWindow.startbot()
 bot_disable = MainWindow.stopbot()
 bot_exit = MainWindow.closebot()
 
-# Flags ToAdd
+#Imported Databases
+base_dir = Path(__file__).parent
+moves_path = base_dir / 'Databases' / 'moves.json'
+species_path = base_dir / 'Databases' / 'species.json'
+types_path = base_dir / 'Databases' / 'types.json'
+
+#Imported Images
+
+# Flags
 in_battle = False
-stuck = False
+stuck = "OK"
+db_loaded = False
+
+#Configs
+pokemon_name_confidence = 80
+pokemon_nature_confidence = 80
 
 # Screen regions #TODO: Mudar estas cordenas
 sideparty_region = [1234, 470, 1365, 767]
@@ -32,10 +48,47 @@ move4_x, move4_y = 814, 652
 
 # Functions
 
+#Database Import
+def import_dbs():
+    try:
+        with moves_path.open('r', encoding='utf-8') as f:
+            moves_db = json.load(f)
+    except Exception as e:
+        print(f"Error loading JSON: {e}")
+        return None
+
+    try:
+        with species_path.open('r', encoding='utf-8') as f:
+            species_db = json.load(f)
+    except Exception as e:
+        print(f"Error loading JSON: {e}")
+        return None
+
+    try:
+        with types_path.open('r', encoding='utf-8') as f:
+            types_db = json.load(f)
+    except Exception as e:
+        print(f"Error loading JSON: {e}")
+        return None
+
+    return moves_db, species_db, types_db
+
+
+#Name and Nature Verification
+def name_exists(wanted, names_list):
+    w = wanted.strip().lower()
+    return any(n.get('name', '').lower() == w for n in names_list)
+
+
+def nature_exists(wanted, nature_list):
+    w = wanted.strip().lower()
+    return any(n.get('nature', '').lower() == w for n in nature_list)
+
+
 #Movement Functions
 def walk(direction, walk_time):
     pyautogui.keyDown(direction)
-    time.sleep(random.uniform(walk_time/2, walk_time*1.5))
+    time.sleep(random.uniform(walk_time / 2, walk_time * 1.5))
     pyautogui.keyUp(direction)
 
 
@@ -44,6 +97,7 @@ def single_press(direction):
     time.sleep(random.uniform(0.1, 0.5))
     pyautogui.keyUp(direction)
     time.sleep(random.uniform(0.1, 0.5))
+
 
 #Fight Functions
 def use_move(move_number):
@@ -74,62 +128,30 @@ def use_move(move_number):
             return None
         case _:
             print("Invalid move number")
-            stuck = True
+            stuck = "Move invalid"
             return stuck
+
 
 def run_away():
     time.sleep(random.uniform(0.5, 2))
     pyautogui.click(run_btn_x, run_btn_y)
     time.sleep(random.uniform(0.5, 2))
+
+
 #TODO: Implementar Atirar pokebola
 #TODO: Trocar de Pokemon
 
-#Verification Functions
-#TODO: Verificar Nome
-#TODO: Verificar Natureza
+#Pokémon Verification Functions
+
+def verify_pokemon(wanted, found):
+    return fuzz.ratio(wanted, found) >= pokemon_name_confidence
+
+
+def verify_nature(wanted, found):
+    return fuzz.ratio(wanted, found) >= pokemon_nature_confidence
+
+
 #TODO: Verificar Shiny
-
-#ToDelete Functions
-def get_party_num():  # it returns 6 if bot starts during battle
-    empty_slots = pyautogui.locateAllOnScreen('empty_slot.png', region=sideparty_region)
-    pk_in_party = 6 - len(list(empty_slots))
-    return pk_in_party
-
-def leave_pcenter():
-    for step in range(11):
-        single_press("down")
-    time.sleep(8)
-
-def heal_at_pcenter():
-    time.sleep(6)
-    for step in range(8):
-        single_press("up")
-    for step in range(8):
-        single_press("space")
-        pyautogui.moveRel(5, 5)
-    time.sleep(8)
-    pyautogui.moveTo(cursor_away, cursor_away)
-    single_press("space")
-    leave_pcenter()
-    time.sleep(8)
-
-def move_between_pc_grass(destination):
-    for step in destination:
-        single_press(step)
-
-def chat_debug(debug_message):
-    pyautogui.click(chatbar_x, chatbar_y)
-    pyautogui.write(debug_message)
-    time.sleep(0.4)
-    pyautogui.hotkey("ctrl", "a")
-    pyautogui.press("delete")
-    pyautogui.click(cursor_away, cursor_away)
-    log = open("log.txt", "a+")
-    log.write(debug_message + "\n")
-    log.close()
-
-party_num = get_party_num()
-chat_debug("You have " + str(party_num) + " pokemon")
 
 
 #Main Script
@@ -177,7 +199,8 @@ while bot_enable:
                         single_press("down")
                     for step in range(random.randint(1, 4)):
                         single_press("up")
-                    overworld_screen = pyautogui.locateCenterOnScreen("not_battle.png", region=battlecheck_region, grayscale=True)
+                    overworld_screen = pyautogui.locateCenterOnScreen("not_battle.png", region=battlecheck_region,
+                                                                      grayscale=True)
                     if overworld_screen is None:
                         in_battle = True
                     else:
