@@ -1,19 +1,11 @@
 #Create simple GUI with pyqt5 and matplotlib
-
 import sys
-
-import PyQt5.QtCore
-import PyQt5.QtGui
-import PyQt5.QtWidgets
 import matplotlib
-
-matplotlib.use('Qt5Agg')
 from matplotlib import style
+from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton
+
+matplotlib.use('QtAgg')
 style.use('ggplot')
-
-
-def closebot():
-    print("Bot closed")
 
 
 class MainWindow(QMainWindow):
@@ -73,6 +65,9 @@ class MainWindow(QMainWindow):
 
     def stopbot(self):
         print("Bot stopped")
+
+    def closebot(self):
+        print("Bot closed")
 
 
 app=QApplication(sys.argv)
