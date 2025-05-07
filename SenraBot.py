@@ -10,16 +10,17 @@ bot_enable = MainWindow.startbot()
 bot_disable = MainWindow.stopbot()
 bot_exit = MainWindow.closebot()
 
-# Screen regions ToChange
+# Flags ToAdd
+in_battle = False
+stuck = False
+
+# Screen regions #TODO: Mudar estas cordenas
 sideparty_region = [1234, 470, 1365, 767]
 battlecheck_region = [1100, 650, 1300, 750]
 select_oth_pk_region = [565, 114, 794, 159]
 pokecenter_region = [500, 100, 650, 250]
 
-# Flags ToAdd
-in_battle = False
-
-# Actions Locations on Screen ToChange
+# Actions Locations on Screen #TODO: Mudar estas cordenas
 fight_btn_x, fight_btn_y = 647, 650
 run_btn_x, run_btn_y = 845, 730
 choose_other_pk_btn_x, choose_other_pk_btn_y = 678, 240
@@ -34,15 +35,15 @@ move4_x, move4_y = 814, 652
 #Movement Functions
 def walk(direction, walk_time):
     pyautogui.keyDown(direction)
-    time.sleep(walk_time)
+    time.sleep(random.uniform(walk_time/2, walk_time*1.5))
     pyautogui.keyUp(direction)
 
 
 def single_press(direction):
     pyautogui.keyDown(direction)
-    time.sleep(0.1)
+    time.sleep(random.uniform(0.1, 0.5))
     pyautogui.keyUp(direction)
-    time.sleep(0.15)
+    time.sleep(random.uniform(0.1, 0.5))
 
 #Fight Functions
 def use_move(move_number):
@@ -52,32 +53,41 @@ def use_move(move_number):
             pyautogui.click(fight_btn_x, fight_btn_y)
             time.sleep(random.uniform(0.5, 2))
             pyautogui.click(move1_x, move1_y)
+            return None
         case "2":
             time.sleep(random.uniform(0.5, 2))
             pyautogui.click(fight_btn_x, fight_btn_y)
             time.sleep(random.uniform(0.5, 2))
             pyautogui.click(move2_x, move2_y)
+            return None
         case "3":
             time.sleep(random.uniform(0.5, 2))
             pyautogui.click(fight_btn_x, fight_btn_y)
             time.sleep(random.uniform(0.5, 2))
             pyautogui.click(move3_x, move3_y)
+            return None
         case "4":
             time.sleep(random.uniform(0.5, 2))
             pyautogui.click(fight_btn_x, fight_btn_y)
             time.sleep(random.uniform(0.5, 2))
             pyautogui.click(move4_x, move4_y)
+            return None
         case _:
             print("Invalid move number")
-            return
+            stuck = True
+            return stuck
 
 def run_away():
     time.sleep(random.uniform(0.5, 2))
     pyautogui.click(run_btn_x, run_btn_y)
     time.sleep(random.uniform(0.5, 2))
+#TODO: Implementar Atirar pokebola
+#TODO: Trocar de Pokemon
 
-
-
+#Verification Functions
+#TODO: Verificar Nome
+#TODO: Verificar Natureza
+#TODO: Verificar Shiny
 
 #ToDelete Functions
 def get_party_num():  # it returns 6 if bot starts during battle
