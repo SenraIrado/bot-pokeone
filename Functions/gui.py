@@ -1,5 +1,7 @@
 #Create simple GUI with pyqt5 and matplotlib
 import sys
+from operator import truediv
+
 import matplotlib
 from matplotlib import style
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton
@@ -55,20 +57,25 @@ class MainWindow(QMainWindow):
     def namecheck(self):
         pname = self.pline1.text()
         print("Name saved:", pname)
+        return pname
     
     def naturecheck(self):
         pnature = self.pline2.text()
         print("Nature saved:", pnature)
+        return pnature
 
     def startbot(self):
         print("Bot started")
-
+        botting = True
+        return botting
     def stopbot(self):
         print("Bot stopped")
-
+        stop = True
+        return stop
     def closebot(self):
         print("Bot closed")
-
+        exit = True
+        return exit
 
 app=QApplication(sys.argv)
 window=MainWindow()
