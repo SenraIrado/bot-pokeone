@@ -1,23 +1,29 @@
-import pyautogui
-import time
-import random
 import json
+import random
+import time
 from pathlib import Path
-from Functions.gui import MainWindow
+import pyautogui
 from rapidfuzz import fuzz
+from Functions.gui import *
+
+#Start Gui
+#TODO Find a way to run Gui and Script at the same time
 
 #Imported Variables
-wanted_name = MainWindow.namecheck()
-wanted_nature = MainWindow.naturecheck()
-bot_enable = MainWindow.startbot()
-bot_disable = MainWindow.stopbot()
-bot_exit = MainWindow.closebot()
+window = MainWindow()
+wanted_name = window.namecheck()
+wanted_nature = window.naturecheck()
+bot_enable = window.startbot()
+bot_disable = window.stopbot()
+bot_exit = window.closebot()
+
 
 #Imported Databases
 base_dir = Path(__file__).parent
 moves_path = base_dir / 'Databases' / 'moves.json'
 species_path = base_dir / 'Databases' / 'species.json'
 types_path = base_dir / 'Databases' / 'types.json'
+natures_path = base_dir / 'Databases' / 'natures.json'
 
 #Imported Images
 
@@ -56,22 +62,26 @@ def import_dbs():
     except Exception as e:
         print(f"Error loading JSON: {e}")
         return None
-
     try:
         with species_path.open('r', encoding='utf-8') as f:
             species_db = json.load(f)
     except Exception as e:
         print(f"Error loading JSON: {e}")
         return None
-
     try:
         with types_path.open('r', encoding='utf-8') as f:
             types_db = json.load(f)
     except Exception as e:
         print(f"Error loading JSON: {e}")
         return None
+    try:
+        with natures_path.open('r', encoding='utf-8') as f:
+            natures_db = json.load(f)
+    except Exception as e:
+        print(f"Error loading JSON: {e}")
+        return None
 
-    return moves_db, species_db, types_db
+    return moves_db, species_db, types_db, natures_db
 
 
 #Name and Nature Verification
@@ -156,7 +166,7 @@ def verify_nature(wanted, found):
 
 #Main Script
 while bot_enable:
-
+    print("Bot enabled ")
     pyautogui.moveTo(cursor_away, cursor_away)
 
     # check if battle
@@ -239,3 +249,4 @@ while bot_enable:
                     overworld_screen = pyautogui.locateCenterOnScreen("not_battle.png", region=battlecheck_region)
                 pyautogui.moveTo(cursor_away, cursor_away)
                 in_battle = False
+

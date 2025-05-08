@@ -1,10 +1,9 @@
 #Create simple GUI with pyqt5 and matplotlib
 import sys
-from operator import truediv
 
 import matplotlib
-from matplotlib import style
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton
+from matplotlib import style
 
 matplotlib.use('QtAgg')
 style.use('ggplot')
@@ -77,7 +76,10 @@ class MainWindow(QMainWindow):
         exit = True
         return exit
 
-app=QApplication(sys.argv)
-window=MainWindow()
+
+
+
+app = QApplication(sys.argv)
+window = MainWindow()
 window.show()
-app.exec()    #execute app
+app.exec()  # execute app
