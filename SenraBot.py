@@ -5,38 +5,53 @@ from pathlib import Path
 import pyautogui
 from rapidfuzz import fuzz
 from Functions.gui import *
+import easyocr
+import cv2
+import numpy as np
 
 #Start Gui
 #TODO Find a way to run Gui and Script at the same time
 
-#Imported Variables
+#Start OCR
+reader = easyocr.Reader(['en'])
+
+#region Imported Variables
 window = MainWindow()
 wanted_name = window.namecheck()
 wanted_nature = window.naturecheck()
 bot_enable = window.startbot()
 bot_disable = window.stopbot()
 bot_exit = window.closebot()
+#endregion
 
 
-#Imported Databases
+#region Imported Databases #TODO: Adicionar JSON com todas as abilidades do jogo
 base_dir = Path(__file__).parent
 moves_path = base_dir / 'Databases' / 'moves.json'
-abilities_path = base_dir / 'Databases' / 'moves.json' #TODO: Adicionar JSON com todas as abilidades do jogo
+abilities_path = base_dir / 'Databases' / 'abilities.json'
 species_path = base_dir / 'Databases' / 'species.json'
 types_path = base_dir / 'Databases' / 'types.json'
 natures_path = base_dir / 'Databases' / 'natures.json'
+#endregion
 
 #Imported Images
 
-# Flags
-in_battle = False
-stuck = "OK"
-db_loaded = False
+#region Flags
+flag_in_battle = False
+flag_stuck = "OK"
+flag_db_loaded = False
+flag_first_run = False
+#endregion
 
-#Configs
-pokemon_name_confidence = 80
-pokemon_nature_confidence = 80
-pokemon_ability_confidence = 80
+
+#region Configs
+cfg_pokemon_name_confidence = 80
+cfg_pokemon_nature_confidence = 80
+cfg_pokemon_ability_confidence = 80
+cfg_threshold_min = 0
+cfg_threshold_max = 255
+cfg_denoise = 3
+#endregion
 
 # Screen regions #TODO: Mudar estas cordenas
 sideparty_region = [1234, 470, 1365, 767]
@@ -162,21 +177,65 @@ def run_away():
 #Pokémon Verification Functions
 
 def verify_pokemon(wanted, found):
-    return fuzz.ratio(wanted, found) >= pokemon_name_confidence
+    return fuzz.ratio(wanted, found) >= cfg_pokemon_name_confidence
 
 
 def verify_nature(wanted, found):
-    return fuzz.ratio(wanted, found) >= pokemon_nature_confidence
+    return fuzz.ratio(wanted, found) >= cfg_pokemon_nature_confidence
+
 
 def verify_ability(wanted, found):
-    return fuzz.ratio(wanted, found) >= pokemon_ability_confidence
+    return fuzz.ratio(wanted, found) >= cfg_pokemon_ability_confidence
+
 
 #TODO: Verificar Shiny
 
-#Visual Inspection Functions
-#TODO: Verificar nome no ecra
-#TODO: Verificar Abilidade no ecra
-#TODO: Verificar Natureza no ecra
+#Text Inspection Functions
+
+def inspect_name():
+    inspect = reader.readtext('pokemon_name_image.png')
+    text = [t[1] for t in inspect]
+    return text
+
+
+def inspect_nature():
+    inspect = reader.readtext('pokemon_nature_image.png')
+    text = [t[1] for t in inspect]
+    return text
+
+
+def inspect_ability():
+    inspect = reader.readtext('pokemon_ability_image.png')
+    text = [t[1] for t in inspect]
+    return text
+
+
+#Image Get and Treatment Functions
+
+def configure_regions():
+    screenshot = pyautogui.screenshot()
+    img = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
+    x, y, w, h = cv2.selectROI("Drag to select region", img, True, False)
+    cv2.destroyAllWindows()
+    region = img[y:y + h, x:x + w]
+    return region
+
+
+def print_region(region):
+    screenshot = pyautogui.screenshot(region=region)
+    return screenshot
+
+
+def image_treatment(image_path):
+    img = cv2.imread(image_path)
+    grayscale = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    _, threshold = cv2.threshold(grayscale, cfg_threshold_min, cfg_threshold_max, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    denoised = cv2.medianBlur(threshold, cfg_denoise)
+    return denoised
+    #Do Morphology if only necessary - This could cause letters to stick AB-> A
+    #morph = cv2.getStructuringElement(cv2.MORPH_RECT, (2,2))
+    #clean = cv2.morphologyEx(denoised, cv2.MORPH_CLOSE, kernel)
+
 
 #Main Script
 while bot_enable:
@@ -263,4 +322,3 @@ while bot_enable:
                     overworld_screen = pyautogui.locateCenterOnScreen("not_battle.png", region=battlecheck_region)
                 pyautogui.moveTo(cursor_away, cursor_away)
                 in_battle = False
-
