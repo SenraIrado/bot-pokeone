@@ -21,6 +21,7 @@ bot_exit = window.closebot()
 #Imported Databases
 base_dir = Path(__file__).parent
 moves_path = base_dir / 'Databases' / 'moves.json'
+abilities_path = base_dir / 'Databases' / 'moves.json' #TODO: Adicionar JSON com todas as abilidades do jogo
 species_path = base_dir / 'Databases' / 'species.json'
 types_path = base_dir / 'Databases' / 'types.json'
 natures_path = base_dir / 'Databases' / 'natures.json'
@@ -35,6 +36,7 @@ db_loaded = False
 #Configs
 pokemon_name_confidence = 80
 pokemon_nature_confidence = 80
+pokemon_ability_confidence = 80
 
 # Screen regions #TODO: Mudar estas cordenas
 sideparty_region = [1234, 470, 1365, 767]
@@ -80,8 +82,14 @@ def import_dbs():
     except Exception as e:
         print(f"Error loading JSON: {e}")
         return None
+    try:
+        with abilities_path.open('r', encoding='utf-8') as f:
+            abilities_db = json.load(f)
+    except Exception as e:
+        print(f"Error loading JSON: {e}")
+        return None
 
-    return moves_db, species_db, types_db, natures_db
+    return moves_db, species_db, types_db, natures_db, abilities_db
 
 
 #Name and Nature Verification
@@ -160,9 +168,15 @@ def verify_pokemon(wanted, found):
 def verify_nature(wanted, found):
     return fuzz.ratio(wanted, found) >= pokemon_nature_confidence
 
+def verify_ability(wanted, found):
+    return fuzz.ratio(wanted, found) >= pokemon_ability_confidence
 
 #TODO: Verificar Shiny
 
+#Visual Inspection Functions
+#TODO: Verificar nome no ecra
+#TODO: Verificar Abilidade no ecra
+#TODO: Verificar Natureza no ecra
 
 #Main Script
 while bot_enable:
