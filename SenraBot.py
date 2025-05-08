@@ -1,3 +1,4 @@
+#region Python Imports
 import json
 import random
 import time
@@ -8,13 +9,18 @@ from Functions.gui import *
 import easyocr
 import cv2
 import numpy as np
+#endregion
 
-#Start Gui
+#region Start External Scripts and Tools
+#region Start Gui
 #TODO Find a way to run Gui and Script at the same time
-
-#Start OCR
+#endregion
+#regionStart OCR
 reader = easyocr.Reader(['en'])
+#endregion
+#endregion
 
+#region Data Import
 #region Imported Variables
 window = MainWindow()
 wanted_name = window.namecheck()
@@ -23,7 +29,6 @@ bot_enable = window.startbot()
 bot_disable = window.stopbot()
 bot_exit = window.closebot()
 #endregion
-
 
 #region Imported Databases #TODO: Adicionar JSON com todas as abilidades do jogo
 base_dir = Path(__file__).parent
@@ -34,7 +39,9 @@ types_path = base_dir / 'Databases' / 'types.json'
 natures_path = base_dir / 'Databases' / 'natures.json'
 #endregion
 
-#Imported Images
+#region Imported Images
+#endregion
+#endregion
 
 #region Flags
 flag_in_battle = False
@@ -42,7 +49,6 @@ flag_stuck = "OK"
 flag_db_loaded = False
 flag_first_run = False
 #endregion
-
 
 #region Configs
 cfg_pokemon_name_confidence = 80
@@ -170,6 +176,7 @@ def run_away():
     time.sleep(random.uniform(0.5, 2))
     pyautogui.click(run_btn_x, run_btn_y)
     time.sleep(random.uniform(0.5, 2))
+
 
 
 #TODO: Implementar Atirar pokebola
