@@ -53,13 +53,14 @@ cfg_threshold_max = 255
 cfg_denoise = 3
 #endregion
 
-# Screen regions #TODO: Mudar estas cordenas
+#region Screen regions #TODO: Mudar estas cordenas
 sideparty_region = [1234, 470, 1365, 767]
 battlecheck_region = [1100, 650, 1300, 750]
 select_oth_pk_region = [565, 114, 794, 159]
 pokecenter_region = [500, 100, 650, 250]
+#endregion
 
-# Actions Locations on Screen #TODO: Mudar estas cordenas
+#region Actions Locations on Screen #TODO: Mudar estas cordenas
 fight_btn_x, fight_btn_y = 647, 650
 run_btn_x, run_btn_y = 845, 730
 choose_other_pk_btn_x, choose_other_pk_btn_y = 678, 240
@@ -67,11 +68,11 @@ move1_x, move1_y = 522, 586
 move2_x, move2_y = 814, 589
 move3_x, move3_y = 522, 652
 move4_x, move4_y = 814, 652
+#endregion
 
+#region Functions
 
-# Functions
-
-#Database Import
+#region Database Import
 def import_dbs():
     try:
         with moves_path.open('r', encoding='utf-8') as f:
@@ -105,9 +106,9 @@ def import_dbs():
         return None
 
     return moves_db, species_db, types_db, natures_db, abilities_db
+#endregion
 
-
-#Name and Nature Verification
+#region Name and Nature Verification
 def name_exists(wanted, names_list):
     w = wanted.strip().lower()
     return any(n.get('name', '').lower() == w for n in names_list)
@@ -116,9 +117,9 @@ def name_exists(wanted, names_list):
 def nature_exists(wanted, nature_list):
     w = wanted.strip().lower()
     return any(n.get('nature', '').lower() == w for n in nature_list)
+#endregion
 
-
-#Movement Functions
+#region Movement Functions
 def walk(direction, walk_time):
     pyautogui.keyDown(direction)
     time.sleep(random.uniform(walk_time / 2, walk_time * 1.5))
@@ -130,9 +131,9 @@ def single_press(direction):
     time.sleep(random.uniform(0.1, 0.5))
     pyautogui.keyUp(direction)
     time.sleep(random.uniform(0.1, 0.5))
+#endregion
 
-
-#Fight Functions
+#region Fight Functions
 def use_move(move_number):
     match move_number:
         case "1":
@@ -173,8 +174,9 @@ def run_away():
 
 #TODO: Implementar Atirar pokebola
 #TODO: Trocar de Pokemon
+#endregion
 
-#Pokémon Verification Functions
+#region Pokémon Verification Functions
 
 def verify_pokemon(wanted, found):
     return fuzz.ratio(wanted, found) >= cfg_pokemon_name_confidence
@@ -187,10 +189,10 @@ def verify_nature(wanted, found):
 def verify_ability(wanted, found):
     return fuzz.ratio(wanted, found) >= cfg_pokemon_ability_confidence
 
-
 #TODO: Verificar Shiny
+#endregion
 
-#Text Inspection Functions
+#region Text Inspection Functions
 
 def inspect_name():
     inspect = reader.readtext('pokemon_name_image.png')
@@ -208,9 +210,9 @@ def inspect_ability():
     inspect = reader.readtext('pokemon_ability_image.png')
     text = [t[1] for t in inspect]
     return text
+#endregion
 
-
-#Image Get and Treatment Functions
+#region Image Get and Treatment Functions
 
 def configure_regions():
     screenshot = pyautogui.screenshot()
@@ -235,9 +237,10 @@ def image_treatment(image_path):
     #Do Morphology if only necessary - This could cause letters to stick AB-> A
     #morph = cv2.getStructuringElement(cv2.MORPH_RECT, (2,2))
     #clean = cv2.morphologyEx(denoised, cv2.MORPH_CLOSE, kernel)
+#endregion
+#endregion
 
-
-#Main Script
+#region Main Script
 while bot_enable:
     print("Bot enabled ")
     pyautogui.moveTo(cursor_away, cursor_away)
@@ -322,3 +325,4 @@ while bot_enable:
                     overworld_screen = pyautogui.locateCenterOnScreen("not_battle.png", region=battlecheck_region)
                 pyautogui.moveTo(cursor_away, cursor_away)
                 in_battle = False
+#endregion
