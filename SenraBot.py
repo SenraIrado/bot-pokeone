@@ -15,7 +15,7 @@ import numpy as np
 #region Start Gui
 #TODO Find a way to run Gui and Script at the same time
 #endregion
-#regionStart OCR
+#region Start OCR
 reader = easyocr.Reader(['en'])
 #endregion
 #endregion
@@ -177,8 +177,6 @@ def run_away():
     pyautogui.click(run_btn_x, run_btn_y)
     time.sleep(random.uniform(0.5, 2))
 
-
-
 #TODO: Implementar Atirar pokebola
 #TODO: Trocar de Pokemon
 #endregion
@@ -245,6 +243,12 @@ def image_treatment(image_path):
     #morph = cv2.getStructuringElement(cv2.MORPH_RECT, (2,2))
     #clean = cv2.morphologyEx(denoised, cv2.MORPH_CLOSE, kernel)
 #endregion
+
+#region World State Checks
+def in_battle():
+    pyautogui.locateCenterOnScreen("not_battle.png", region=battlecheck_region)
+#endregion
+
 #endregion
 
 #region Main Script
