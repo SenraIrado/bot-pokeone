@@ -1,4 +1,4 @@
-#region Python Imports
+# --- Python Imports ---
 import json
 import random
 import time
@@ -9,64 +9,76 @@ from Functions.gui import *
 import easyocr
 import cv2
 import numpy as np
-#endregion
+import threading
 
-#region Start External Scripts and Tools
-#region Start Gui
-#TODO Find a way to run Gui and Script at the same time
-#endregion
-#region Start OCR
-reader = easyocr.Reader(['en'])
-#endregion
-#endregion
+# --- End Python Imports ---
 
-#region Data Import
-#region Imported Variables
+# --- Block: External Scripts and Tools ---
+
+# --- GUI ---
+# TODO Find a way to run Gui and Script at the same time
+# --- End GUI ---
+
+# --- OCR ---
+reader = easyocr.Reader(["en"])
+# --- End OCR ---
+
+# --- End Block: External Scripts and Tools ---
+
+# --- Block: External Data Import ---
+
+# --- Import Variables ---
 window = MainWindow()
 wanted_name = window.namecheck()
 wanted_nature = window.naturecheck()
 bot_enable = window.startbot()
 bot_disable = window.stopbot()
 bot_exit = window.closebot()
-#endregion
+# --- End Import Variables ---
 
-#region Imported Databases #TODO: Adicionar JSON com todas as abilidades do jogo
+# --- Import Databases
+# TODO: Adicionar JSON com todas as abilidades do jogo ---
 base_dir = Path(__file__).parent
-moves_path = base_dir / 'Databases' / 'moves.json'
-abilities_path = base_dir / 'Databases' / 'abilities.json'
-species_path = base_dir / 'Databases' / 'species.json'
-types_path = base_dir / 'Databases' / 'types.json'
-natures_path = base_dir / 'Databases' / 'natures.json'
-#endregion
+moves_path = base_dir / "Database" / "moves.json"
+abilities_path = base_dir / "Database" / "abilities.json"
+species_path = base_dir / "Database" / "species.json"
+types_path = base_dir / "Database" / "types.json"
+natures_path = base_dir / "Database" / "natures.json"
+# --- End External Import Databases ---
 
-#region Imported Images
-#endregion
-#endregion
+# --- Import Images ---
+# --- End Import Images ---
 
-#region Flags
+# --- End Block: Data Import ---
+
+# --- Block: Flags and Configs ---
+
+# --- Flags ---
 flag_in_battle = False
 flag_stuck = "OK"
 flag_db_loaded = False
 flag_first_run = False
-#endregion
+# --- End Flags ---
 
-#region Configs
+# --- Configs ---
 cfg_pokemon_name_confidence = 80
 cfg_pokemon_nature_confidence = 80
 cfg_pokemon_ability_confidence = 80
 cfg_threshold_min = 0
 cfg_threshold_max = 255
 cfg_denoise = 3
-#endregion
+# --- End Configs ---
 
-#region Screen regions #TODO: Mudar estas cordenas
+# --- Screen regions ---
+# TODO: Mudar estas cordenas
 sideparty_region = [1234, 470, 1365, 767]
 battlecheck_region = [1100, 650, 1300, 750]
 select_oth_pk_region = [565, 114, 794, 159]
 pokecenter_region = [500, 100, 650, 250]
-#endregion
+# --- End Screen Regions ---
 
-#region Actions Locations on Screen #TODO: Mudar estas cordenas
+# --- Actions Locations on Screen ---
+# TODO: Mudar estas cordenas
 fight_btn_x, fight_btn_y = 647, 650
 run_btn_x, run_btn_y = 845, 730
 choose_other_pk_btn_x, choose_other_pk_btn_y = 678, 240
@@ -74,58 +86,70 @@ move1_x, move1_y = 522, 586
 move2_x, move2_y = 814, 589
 move3_x, move3_y = 522, 652
 move4_x, move4_y = 814, 652
-#endregion
+# --- End Actions Locations on Screen ---
 
-#region Functions
+# --- End Block: Actions Locations on Screen ---
 
-#region Database Import
+# --- Block: Functions ---
+
+# --- Database Import ---
+
+
 def import_dbs():
     try:
-        with moves_path.open('r', encoding='utf-8') as f:
+        with moves_path.open("r", encoding="utf-8") as f:
             moves_db = json.load(f)
     except Exception as e:
         print(f"Error loading JSON: {e}")
         return None
     try:
-        with species_path.open('r', encoding='utf-8') as f:
+        with species_path.open("r", encoding="utf-8") as f:
             species_db = json.load(f)
     except Exception as e:
         print(f"Error loading JSON: {e}")
         return None
     try:
-        with types_path.open('r', encoding='utf-8') as f:
+        with types_path.open("r", encoding="utf-8") as f:
             types_db = json.load(f)
     except Exception as e:
         print(f"Error loading JSON: {e}")
         return None
     try:
-        with natures_path.open('r', encoding='utf-8') as f:
+        with natures_path.open("r", encoding="utf-8") as f:
             natures_db = json.load(f)
     except Exception as e:
         print(f"Error loading JSON: {e}")
         return None
     try:
-        with abilities_path.open('r', encoding='utf-8') as f:
+        with abilities_path.open("r", encoding="utf-8") as f:
             abilities_db = json.load(f)
     except Exception as e:
         print(f"Error loading JSON: {e}")
         return None
 
     return moves_db, species_db, types_db, natures_db, abilities_db
-#endregion
 
-#region Name and Nature Verification
+
+# --- End Database Import ---
+
+# --- Name and Nature Verification ---
+
+
 def name_exists(wanted, names_list):
     w = wanted.strip().lower()
-    return any(n.get('name', '').lower() == w for n in names_list)
+    return any(n.get("name", "").lower() == w for n in names_list)
 
 
 def nature_exists(wanted, nature_list):
     w = wanted.strip().lower()
-    return any(n.get('nature', '').lower() == w for n in nature_list)
-#endregion
+    return any(n.get("nature", "").lower() == w for n in nature_list)
 
-#region Movement Functions
+
+# --- End Name and Nature Verification ---
+
+# --- Movement Functions ---
+
+
 def walk(direction, walk_time):
     pyautogui.keyDown(direction)
     time.sleep(random.uniform(walk_time / 2, walk_time * 1.5))
@@ -137,9 +161,13 @@ def single_press(direction):
     time.sleep(random.uniform(0.1, 0.5))
     pyautogui.keyUp(direction)
     time.sleep(random.uniform(0.1, 0.5))
-#endregion
 
-#region Fight Functions
+
+# --- End Movement Functions ---
+
+# --- Fight Functions ---
+
+
 def use_move(move_number):
     match move_number:
         case "1":
@@ -177,11 +205,12 @@ def run_away():
     pyautogui.click(run_btn_x, run_btn_y)
     time.sleep(random.uniform(0.5, 2))
 
-#TODO: Implementar Atirar pokebola
-#TODO: Trocar de Pokemon
-#endregion
+# TODO: Implementar Atirar pokebola
+# TODO: Trocar de Pokemon
+# --- End Turn Functions ---
 
-#region Pokémon Verification Functions
+# --- Pokémon Verification Functions ---
+
 
 def verify_pokemon(wanted, found):
     return fuzz.ratio(wanted, found) >= cfg_pokemon_name_confidence
@@ -194,37 +223,42 @@ def verify_nature(wanted, found):
 def verify_ability(wanted, found):
     return fuzz.ratio(wanted, found) >= cfg_pokemon_ability_confidence
 
-#TODO: Verificar Shiny
-#endregion
 
-#region Text Inspection Functions
+# TODO: Verificar Shiny
+# --- End Pokémon Verification Functions ---
+
+# --- Text Inspection Functions ---
+
 
 def inspect_name():
-    inspect = reader.readtext('pokemon_name_image.png')
+    inspect = reader.readtext("pokemon_name_image.png")
     text = [t[1] for t in inspect]
     return text
 
 
 def inspect_nature():
-    inspect = reader.readtext('pokemon_nature_image.png')
+    inspect = reader.readtext("pokemon_nature_image.png")
     text = [t[1] for t in inspect]
     return text
 
 
 def inspect_ability():
-    inspect = reader.readtext('pokemon_ability_image.png')
+    inspect = reader.readtext("pokemon_ability_image.png")
     text = [t[1] for t in inspect]
     return text
-#endregion
 
-#region Image Get and Treatment Functions
+
+# --- End Text Inspection Functions ---
+
+# --- Image Get and Treatment Functions ---
+
 
 def configure_regions():
     screenshot = pyautogui.screenshot()
     img = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
     x, y, w, h = cv2.selectROI("Drag to select region", img, True, False)
     cv2.destroyAllWindows()
-    region = img[y:y + h, x:x + w]
+    region = img[y: y + h, x: x + w]
     return region
 
 
@@ -236,34 +270,53 @@ def print_region(region):
 def image_treatment(image_path):
     img = cv2.imread(image_path)
     grayscale = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    _, threshold = cv2.threshold(grayscale, cfg_threshold_min, cfg_threshold_max, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    _, threshold = cv2.threshold(
+        grayscale,
+        cfg_threshold_min,
+        cfg_threshold_max,
+        cv2.THRESH_BINARY + cv2.THRESH_OTSU,
+    )
     denoised = cv2.medianBlur(threshold, cfg_denoise)
     return denoised
-    #Do Morphology if only necessary - This could cause letters to stick AB-> A
-    #morph = cv2.getStructuringElement(cv2.MORPH_RECT, (2,2))
-    #clean = cv2.morphologyEx(denoised, cv2.MORPH_CLOSE, kernel)
-#endregion
+    # Do Morphology if only necessary - This could cause letters to stick AB-> A
+    # morph = cv2.getStructuringElement(cv2.MORPH_RECT, (2,2))
+    # clean = cv2.morphologyEx(denoised, cv2.MORPH_CLOSE, kernel)
 
-#region World State Checks
+
+# --- End Image Treatment Functions ---
+
+# --- World State Checks ---
+
+
 def in_battle():
     pyautogui.locateCenterOnScreen("not_battle.png", region=battlecheck_region)
-#endregion
 
-#endregion
 
-#region Main Script
+# --- End World State Checks ---
+
+# --- End Block: Functions ---
+
+
+# --- Main Script ---
 while bot_enable:
     print("Bot enabled ")
     pyautogui.moveTo(cursor_away, cursor_away)
 
     # check if battle
-    overworld_screen = pyautogui.locateCenterOnScreen("not_battle.png", region=battlecheck_region)
+    overworld_screen = pyautogui.locateCenterOnScreen(
+        "not_battle.png", region=battlecheck_region
+    )
 
     if overworld_screen is not None:  # we're not in battle
         chat_debug("no battle")
 
         # check if 1st pokemon alive (if party 2, check 1st pok, if party 6, check 5th pok)
-        fainted_on_screen = len(list(pyautogui.locateAllOnScreen("fainted_pkmn.png", region=sideparty_region)))
+        fainted_on_screen = len(
+            list(
+                pyautogui.locateAllOnScreen(
+                    "fainted_pkmn.png", region=sideparty_region)
+            )
+        )
 
         while fainted_on_screen == party_num - 1:
             chat_debug("pokemon fainted")
@@ -271,7 +324,9 @@ while bot_enable:
             # go up right in the corner
             walk("up", 5)
             walk("right", 5)
-            overworld_screen = pyautogui.locateCenterOnScreen("not_battle.png", region=battlecheck_region)
+            overworld_screen = pyautogui.locateCenterOnScreen(
+                "not_battle.png", region=battlecheck_region
+            )
             if overworld_screen is None:
                 in_battle = True
                 break
@@ -282,11 +337,15 @@ while bot_enable:
             break
 
         # check if wiped (in pokemon center)
-        pokecenter_on_screen = pyautogui.locateCenterOnScreen("pokecenter.png", region=pokecenter_region)
+        pokecenter_on_screen = pyautogui.locateCenterOnScreen(
+            "pokecenter.png", region=pokecenter_region
+        )
 
         if fainted_on_screen != party_num - 1:  # if not 5/6 fainted
             chat_debug("party_num not " + str(party_num - 1))
-            if pokecenter_on_screen is None:  # and it's not because we wiped and are at pc
+            if (
+                pokecenter_on_screen is None
+            ):  # and it's not because we wiped and are at pc
                 chat_debug("we not in pc")
 
                 # Walk in grass square
@@ -296,8 +355,9 @@ while bot_enable:
                         single_press("down")
                     for step in range(random.randint(1, 4)):
                         single_press("up")
-                    overworld_screen = pyautogui.locateCenterOnScreen("not_battle.png", region=battlecheck_region,
-                                                                      grayscale=True)
+                    overworld_screen = pyautogui.locateCenterOnScreen(
+                        "not_battle.png", region=battlecheck_region, grayscale=True
+                    )
                     if overworld_screen is None:
                         in_battle = True
                     else:
@@ -315,8 +375,12 @@ while bot_enable:
             for try_attack in range(10):  # try attacking for 10 seconds
                 use_move(move4_x, move4_y)
 
-            current_pk_dead = pyautogui.locateCenterOnScreen("fainted_in_battle.png", region=select_oth_pk_region)
-            overworld_screen = pyautogui.locateCenterOnScreen("not_battle.png", region=battlecheck_region)
+            current_pk_dead = pyautogui.locateCenterOnScreen(
+                "fainted_in_battle.png", region=select_oth_pk_region
+            )
+            overworld_screen = pyautogui.locateCenterOnScreen(
+                "not_battle.png", region=battlecheck_region
+            )
 
             # Check if battle finished
             if overworld_screen is not None:
@@ -330,10 +394,14 @@ while bot_enable:
 
                 # Try to run
                 run_away()
-                overworld_screen = pyautogui.locateCenterOnScreen("not_battle.png", region=battlecheck_region)
+                overworld_screen = pyautogui.locateCenterOnScreen(
+                    "not_battle.png", region=battlecheck_region
+                )
                 while overworld_screen is None:
                     run_away()
-                    overworld_screen = pyautogui.locateCenterOnScreen("not_battle.png", region=battlecheck_region)
+                    overworld_screen = pyautogui.locateCenterOnScreen(
+                        "not_battle.png", region=battlecheck_region
+                    )
                 pyautogui.moveTo(cursor_away, cursor_away)
                 in_battle = False
-#endregion
+# --- T ---
